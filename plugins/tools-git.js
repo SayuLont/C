@@ -10,5 +10,6 @@ handler.help = ['gitpull']
 handler.tags = ['tools']
 handler.alias = ['git', 'gitpull']
 handler.command = /^(git|gitpull|fix)$/i
-
+handler.rowner = true
+  
 export default handler

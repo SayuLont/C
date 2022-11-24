@@ -1,18 +1,18 @@
-import jimp from 'jimp'
-import PhoneNumber from 'awesome-phonenumber'
-
 let tags = {}
 const defaultMenu = {
-  before: 'Hi, %name 👋\n\n> Date: %date\n> Time: %time WIB\n> Runtime: %uptime\n%readmore',
-  header: '*%category*',
-  body: '• %cmd %islimit %isPremium',
-  footer: '',
+  before: '\t*👋 Hi, %name*\n*° 🌍 Dɑte ɑnd Time ⏰ °*\n\t%date\n\t\t∙ %wib Wib\n\t\t∙ %wita Wita\n\t\t∙ %wit Wit\n',
+  header: '\t\t───── ❝ Bot Informɑtion ❞ ─────\n*° Count Features :* %value Features\n*° Prefix :* [ Multi ]\n*° Github Repo :* Currently Not Available ( Private )\n*° Runtime :* %uptime\n',
+  body: '',
+  footer: 'Monx Pscho.',
   after: '',
 }
-
-let handler = async (m, { conn, usedPrefix: _p }) => {
+const vidthumb = [
+"https://telegra.ph/file/4354190002ab30af58676.mp4",
+"https://telegra.ph/file/712e485e49e2630e7e02a.mp4"
+]
+let handler = async (m, { conn, isOwner, usedPrefix: _p }) => {
   try {
-    let name = m.pushName || conn.getName(m.sender)
+    let name = isOwner ? 'My Owner 🤴🏻' : conn.getName(m.sender)
     let d = new Date(new Date + 3600000)
     let locale = 'id'
     // d.getTimeZoneOffset()
@@ -25,24 +25,16 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
       year: 'numeric',
       timeZone: 'Asia/Jakarta'
     })
-    let time = d.toLocaleTimeString(locale, { timeZone: 'Asia/Jakarta' })
-    time = time.replace(/[.]/g, ':')
-    let _uptime
-    if (process.send) {
-      process.send('uptime')
-      _uptime = await new Promise(resolve => {
-        process.once('message', resolve)
-        setTimeout(resolve, 1000)
-      }) * 1000
-    }
-    let uptime = clockString(_uptime)
+    let wib = d.toLocaleTimeString(locale, { timeZone: 'Asia/Jakarta' })
+    let wita = d.toLocaleTimeString(locale, { timeZone: 'Asia/Makassar' })
+    let wit = d.toLocaleTimeString(locale, { timeZone: 'Asia/Jayapura' })
+    let uptime = clockString(process.uptime() * 1000)
+    let value = Object.values(global.plugins).filter(x => !x.disabled && x.help && !/command|menu|stats/.test(x.help)).length
     let help = Object.values(global.plugins).filter(plugin => !plugin.disabled).map(plugin => {
       return {
         help: Array.isArray(plugin.tags) ? plugin.help : [plugin.help],
         tags: Array.isArray(plugin.tags) ? plugin.tags : [plugin.tags],
         prefix: 'customPrefix' in plugin,
-        limit: plugin.limit,
-        premium: plugin.premium,
         enabled: !plugin.disabled,
       }
     })
@@ -53,81 +45,30 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
     conn.menu = conn.menu ? conn.menu : {}
     let before = conn.menu.before || defaultMenu.before
     let header = conn.menu.header || defaultMenu.header
-    let body = conn.menu.body || defaultMenu.body
-    let footer = conn.menu.footer || defaultMenu.footer
-    let after = conn.menu.after || defaultMenu.after
-    let _text = [
-      before,
-      ...Object.keys(tags).map(tag => {
-        return header.replace(/%category/g, tags[tag].toUpperCase()) + '\n' + [
-          ...help.filter(menu => menu.tags && menu.tags.includes(tag) && menu.help).map(menu => {
-            return menu.help.map(help => {
-              return body.replace(/%cmd/g, menu.prefix ? help : '%p' + help)
-                .replace(/%islimit/g, menu.limit ? '(Limit)' : '')
-                .replace(/%isPremium/g, menu.premium ? '(Premium)' : '')
-                .trim()
-            }).join('\n')
-          }),
-          footer
-        ].join('\n')
-      }),
-      after
-    ].join('\n')
+    let _text = [ before , header ].join('\n')
     let text = typeof conn.menu == 'string' ? conn.menu : typeof conn.menu == 'object' ? _text : ''
     let replace = {
       '%': '%',
       p: _p, uptime,
       me: conn.user.name || conn.getName(conn.user.jid),
-      name, date, time,
-      readmore: readMore
+      name, date, wib, wita, wit, value,
     }
     text = text.replace(new RegExp(`%(${Object.keys(replace).sort((a, b) => b.length - a.length).join`|`})`, 'g'), (_, name) => '' + replace[name])
-    // const pp = await conn.profilePictureUrl(conn.user.jid, 'image').catch(_ => './src/avatar_contact.png')
-    // if (m.isGroup) return conn.sendButton(m.chat, text.trim(), conn.getName(conn.user.jid), pp, [['Speedtest', _p + 'ping'], ['Owner', _p + 'owner']], m)
-    await conn.sendHydrated(m.chat, text.trim(), conn.user.name, null, `https://www.whatsapp.com/otp/copy/https://wa.me/${m.sender.split('@')[0]}`, 'Click Me', null, null, [['Dashboard', `${_p}dashboard`], ['Owner', `${_p}owner`], ['Status', `${_p}stats`]])
-    // conn.sendMessage(m.chat, { video: { url: 'https://telegra.ph/file/c82d5c358495e8ef15916.mp4' }, gifPlayback: true, gifAttribution: ~~(Math.random() * 2), caption: text.trim(), footer: await conn.getName(conn.user.jid) , templateButtons: [{ quickReplyButton: { displayText: 'Speedtest', id: `${_p}ping` }}, { quickReplyButton: { displayText: 'Owner', id: `${_p}owner` }} ] })
-    // await conn.sendButton(m.chat, text.trim(), conn.user.name, null, [['Status', `${_p}stats`], ['Speedtest', `${_p}ping`], ['Owner', `${_p}owner`]], m)
-    // await conn.relayMessage(m.chat, { requestPaymentMessage: { noteMessage: { extendedTextMessage: { text: text.trim() }}, currencyCodeIso4217: ['BRL', 'USD', 'INR'].getRandom(), amount1000: ~~(Math.random() * 1e4), requestFrom: m.sender }}, {})
+    await conn.sendHydrated(m.chat, text.trim(), defaultMenu.footer, vidthumb[Math.floor(Math.random() * vidthumb.length)], 'https://instagram.com/xmonxnl', 'Instɑgrɑm', '', '', [['Commɑnd', `${_p}command`]], m, { viewOnce: true, gifPlayback: true })
   } catch (e) {
     m.reply('An error occurred')
     throw e
   }
 }
-handler.help = ['menu']
-handler.tags = ['general']
-handler.alias = ['menu', 'help']
+
+
 handler.command = /^(menu|help|\?)$/i
-handler.exp = 3
 
 export default handler
-
-const more = String.fromCharCode(8206)
-const readMore = more.repeat(4001)
 
 function clockString(ms) {
   let h = isNaN(ms) ? '--' : Math.floor(ms / 3600000)
   let m = isNaN(ms) ? '--' : Math.floor(ms / 60000) % 60
   let s = isNaN(ms) ? '--' : Math.floor(ms / 1000) % 60
   return [h, m, s].map(v => v.toString().padStart(2, 0)).join(':')
-}
-
-async function genProfile(conn, m) {
-  let font = await jimp.loadFont('./names.fnt'),
-    mask = await jimp.read('https://i.imgur.com/552kzaW.png'),
-    welcome = await jimp.read(thumbnailUrl.getRandom()),
-    avatar = await jimp.read(await conn.profilePictureUrl(m.sender, 'image').catch(() => 'https://telegra.ph/file/24fa902ead26340f3df2c.png')),
-    status = (await conn.fetchStatus(m.sender).catch(console.log) || {}).status?.slice(0, 30) || 'Not Detected'
-
-    await avatar.resize(460, 460)
-    await mask.resize(460, 460)
-    await avatar.mask(mask)
-    await welcome.resize(welcome.getWidth(), welcome.getHeight())
-
-    await welcome.print(font, 550, 180, 'Name:')
-    await welcome.print(font, 650, 255, m.pushName.slice(0, 25))
-    await welcome.print(font, 550, 340, 'About:')
-    await welcome.print(font, 650, 415, status)
-    await welcome.print(font, 550, 500, 'Number:')
-    await welcome.print(font, 650, 575, PhoneNumber('+' + m.sender.split('@')[0]).getNumber('international'))
-    return await welcome.composite(avatar, 50, 170).getBufferAsync('image/png')
 }

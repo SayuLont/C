@@ -4,7 +4,7 @@ let handler = async (m, { text }) => {
  exec("git pull", (err, stdout) => {
            if(err) return m.reply(err)
            if (stdout) {
-           v.reply(`\t\t\t*× 🔩 GitPull GitHub 🧰 ×*
+           m.reply(`\t\t\t*× 🔩 GitPull GitHub 🧰 ×*
 
 *• Actualizando el sistema a la ultima version:*
 

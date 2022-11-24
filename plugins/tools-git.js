@@ -2,13 +2,9 @@ import { exec } from 'child_process'
 
 let handler = async (m, { text }) => {
  exec("git pull", (err, stdout) => {
-           if(err) return m.reply(err)
+           if(err) throw err
            if (stdout) {
-           m.reply(`\t\t\t*× 🔩 GitPull GitHub 🧰 ×*
-
-*• Actualizando el sistema a la ultima version:*
-
-${stdout}`)
+           throw stdout
 }
 handler.help = ['gitpull']
 handler.tags = ['tools']

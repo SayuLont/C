@@ -3,9 +3,8 @@ import { fileURLToPath } from 'url'
 import { watchFile, unwatchFile } from 'fs'
 
 global.owner = [
-  ['+62 852-4075-0713'],
-  ['+62 877-7456-9531', 'Ripp.', true],
-  ['+212 706-611366', 'Ripp.', true]
+  ['+507 6866-6666'],
+  //['+62 877-7456-9531', 'Ripp.', true]
   // [number, dia creator/owner?, dia developer?]
 ] // Put your number here
 global.mods = [] // Want some help?
